@@ -41,12 +41,25 @@ class AssistantService:
         new_turns: list[dict] = []
 
         for _ in range(self.settings.assistant_max_tool_rounds):
-            response = await client.create_message(
-                system=SYSTEM_PROMPT,
-                messages=working_messages,
-                tools=TOOL_DEFINITIONS,
-                max_tokens=1024,
-            )
+            import httpx
+            try:
+                response = await client.create_message(
+                    system=SYSTEM_PROMPT,
+                    messages=working_messages,
+                    tools=TOOL_DEFINITIONS,
+                    max_tokens=1024,
+                )
+            except httpx.HTTPStatusError as e:
+                if e.response.status_code == 413:
+                    # Fallback if Groq/LLM rejects the payload size (often due to TPM limits with tools)
+                    response = await client.create_message(
+                        system=SYSTEM_PROMPT + "\n[SYSTEM: You are currently operating in a degraded mode because your tool payload exceeded the API limits. You cannot use any tools right now. Explain this to the user.]",
+                        messages=working_messages,
+                        tools=None,
+                        max_tokens=512,
+                    )
+                else:
+                    raise
             assistant_content = response.get("content", [])
             assistant_turn = {"role": "assistant", "content": assistant_content}
             working_messages.append(assistant_turn)
