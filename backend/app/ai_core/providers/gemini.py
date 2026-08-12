@@ -126,16 +126,18 @@ def _gemini_response_to_anthropic(body: dict[str, Any]) -> dict[str, Any]:
 class GeminiClient(BaseLLMClient):
     # Ordered list of models to try - first one that works wins
     FALLBACK_MODELS = [
+        "gemini-3.5-flash",
+        "gemini-3.0-flash",
+        "gemini-2.5-flash",
         "gemini-2.0-flash",
         "gemini-1.5-flash-latest",
         "gemini-1.5-flash",
-        "gemini-1.5-pro-latest",
         "gemini-1.5-pro",
         "gemini-pro",
     ]
 
     def __init__(
-        self, api_key: str, model: str = "gemini-2.0-flash", timeout: float = 60.0
+        self, api_key: str, model: str = "gemini-3.5-flash", timeout: float = 60.0
     ) -> None:
         self.api_key = api_key.strip()
         self.model = model.strip()
