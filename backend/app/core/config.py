@@ -20,6 +20,26 @@ class Settings(BaseSettings):
     # CORS
     allowed_origins: list[str] = ["http://localhost:3000"]
 
+    @field_validator("allowed_origins", mode="before")
+    @classmethod
+    def assemble_cors_origins(cls, v: str | list[str]) -> list[str]:
+        if isinstance(v, str):
+            v = v.strip()
+            if v == "*":
+                return ["*"]
+            if not v.startswith("["):
+                # If they just wrote "https://app.vercel.app", wrap it in a list
+                v = [x.strip() for x in v.split(",") if x.strip()]
+            else:
+                import json
+                try:
+                    v = json.loads(v)
+                except Exception:
+                    pass
+        if isinstance(v, list):
+            return [str(x).rstrip("/") for x in v]
+        return v
+
     # Logging
     log_level: str = "INFO"
 
