@@ -53,7 +53,7 @@ class Settings(BaseSettings):
     # Google Gemini (user has Pro)
     # Key at: https://aistudio.google.com/apikey
     gemini_api_key: str | None = None
-    gemini_model: str = "gemini-2.0-flash"
+    gemini_model: str = "gemini-1.5-pro"
 
     # Ollama (local, no key needed)
     # Install: https://ollama.ai  then: ollama pull llama3.2
