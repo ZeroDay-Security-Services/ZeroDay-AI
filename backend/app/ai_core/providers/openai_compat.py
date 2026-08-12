@@ -154,8 +154,8 @@ class OpenAICompatClient(BaseLLMClient):
         timeout: float = 60.0,
     ) -> None:
         self.base_url = base_url.rstrip("/")
-        self.model = model
-        self.api_key = api_key
+        self.model = model.strip()
+        self.api_key = api_key.strip() if api_key else None
         self.timeout = timeout
 
     async def create_message(
