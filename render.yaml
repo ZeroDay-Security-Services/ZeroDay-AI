@@ -1,0 +1,50 @@
+services:
+  - type: web
+    name: zeroday-security-ai-backend
+    runtime: python
+    region: singapore  # closest to India
+    plan: free         # upgrade to starter ($7/mo) for always-on
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt && alembic upgrade head
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: LOG_LEVEL
+        value: INFO
+      - key: ALLOWED_ORIGINS
+        value: '["https://your-app.vercel.app","https://zerodaysecurity.ai"]'
+      # ── Database ──────────────────────────────────────────────
+      # Render free postgres: add a PostgreSQL database in the Render dashboard
+      # then copy the Internal Database URL here
+      - key: DATABASE_URL
+        sync: false   # set manually in Render dashboard — never commit
+      # ── Auth ──────────────────────────────────────────────────
+      - key: JWT_SECRET_KEY
+        generateValue: true   # Render auto-generates a secure random value
+      - key: ACCESS_TOKEN_EXPIRE_MINUTES
+        value: "30"
+      - key: REFRESH_TOKEN_EXPIRE_MINUTES
+        value: "10080"
+      # ── LLM Provider ──────────────────────────────────────────
+      - key: LLM_PROVIDER
+        sync: false   # set in Render dashboard: groq | nvidia | gemini | anthropic
+      - key: GROQ_API_KEY
+        sync: false
+      - key: GROQ_MODEL
+        value: llama-3.3-70b-versatile
+      - key: NVIDIA_API_KEY
+        sync: false
+      - key: NVIDIA_MODEL
+        value: nvidia/llama-3.1-nemotron-ultra-253b-v1
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GEMINI_MODEL
+        value: gemini-2.0-flash
+      - key: ANTHROPIC_API_KEY
+        sync: false
+      - key: ANTHROPIC_MODEL
+        value: claude-sonnet-4-6
+      - key: NVD_API_KEY
+        sync: false
