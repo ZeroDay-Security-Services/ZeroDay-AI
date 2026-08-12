@@ -1,4 +1,4 @@
-﻿"""Specialized agent dispatch API.
+"""Specialized agent dispatch API.
 
 ZeroDay Security AI provides a unified master agent that covers all security
 domains, plus focused specialist agents for specific workflows.

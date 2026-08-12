@@ -689,11 +689,9 @@ export default function AssistantPage() {
                       <h3 className="mb-2 font-display text-[17px] font-semibold text-text">
                         {currentAgent?.name ?? 'AI Assistant'}
                       </h3>
-                      <p className="mb-5 text-[13px] leading-relaxed text-steelDim">
+                      <p className="text-[13px] leading-relaxed text-steelDim">
                         {currentAgent?.description}
                       </p>
-                      {/* Example prompts */}
-                      <ExamplePrompts agentId={selectedAgent} onSelect={(p) => { setInput(p); textareaRef.current?.focus(); }} />
                     </div>
                   </div>
                 )}
@@ -701,6 +699,7 @@ export default function AssistantPage() {
                 {/* Message bubbles */}
                 {messages.map((m) => (
                   <MessageBubble key={m.id} msg={m} agentColor={agentColor} />
+
                 ))}
 
                 {/* Typing indicator */}
@@ -757,7 +756,7 @@ export default function AssistantPage() {
                   </button>
                 </div>
                 <p className="mt-2 font-mono text-[9.5px] text-steelDim">
-                  Enter to send · Shift+Enter for new line · Responses powered by Groq (llama-3.3-70b)
+                  Enter to send · Shift+Enter for new line
                 </p>
               </div>
             </>
