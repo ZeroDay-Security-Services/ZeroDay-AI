@@ -6,6 +6,7 @@ is a placeholder -- every setting is actually consumed by the application.
 
 from functools import lru_cache
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -26,6 +27,16 @@ class Settings(BaseSettings):
     # external services in development; set DATABASE_URL to a Postgres DSN
     # (e.g. postgresql+asyncpg://user:pass@host/db) in staging/production.
     database_url: str = "sqlite+aiosqlite:///./zeroday.db"
+
+    @field_validator("database_url", mode="before")
+    @classmethod
+    def assemble_db_connection(cls, v: str | None) -> str:
+        if isinstance(v, str):
+            if v.startswith("postgres://"):
+                return v.replace("postgres://", "postgresql+asyncpg://", 1)
+            elif v.startswith("postgresql://"):
+                return v.replace("postgresql://", "postgresql+asyncpg://", 1)
+        return v or "sqlite+aiosqlite:///./zeroday.db"
 
     # Auth / JWT. jwt_secret_key MUST be overridden via env var in any
     # deployed environment -- the default is for local dev only.
