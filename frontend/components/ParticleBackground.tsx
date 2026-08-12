@@ -52,7 +52,7 @@ export default function ParticleBackground() {
         if (p.y > h) p.y = 0;
         ctx.beginPath();
         ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        ctx.fillStyle = `rgba(0,232,255,${p.a})`;
+        ctx.fillStyle = `rgba(180,140,255,${p.a})`;
         ctx.fill();
       }
       for (let i = 0; i < particles.length; i++) {
@@ -66,7 +66,7 @@ export default function ParticleBackground() {
             ctx.beginPath();
             ctx.moveTo(pi.x, pi.y);
             ctx.lineTo(pj.x, pj.y);
-            ctx.strokeStyle = `rgba(45,107,255,${0.06 * (1 - dist / 110)})`;
+            ctx.strokeStyle = `rgba(109,91,255,${0.06 * (1 - dist / 110)})`;
             ctx.lineWidth = 1;
             ctx.stroke();
           }

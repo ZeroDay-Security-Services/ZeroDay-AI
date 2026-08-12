@@ -45,16 +45,16 @@ export default function AICore() {
         ctx.beginPath();
         ctx.moveTo(Math.cos(ang) * r1, Math.sin(ang) * r1);
         ctx.lineTo(Math.cos(ang) * r2, Math.sin(ang) * r2);
-        ctx.strokeStyle = i % 6 === 0 ? 'rgba(0,232,255,0.5)' : 'rgba(124,141,166,0.25)';
+        ctx.strokeStyle = i % 6 === 0 ? 'rgba(180,140,255,0.5)' : 'rgba(124,141,166,0.25)';
         ctx.lineWidth = i % 6 === 0 ? 1.4 : 0.8;
         ctx.stroke();
       }
       ctx.restore();
 
       const arcs = [
-        { r: R * 0.78, speed: 0.4, width: 2.2, color: 'rgba(0,232,255,0.75)', span: 1.1 },
-        { r: R * 0.62, speed: -0.6, width: 1.6, color: 'rgba(45,107,255,0.6)', span: 2.0 },
-        { r: R * 0.46, speed: 0.8, width: 1.2, color: 'rgba(0,232,255,0.4)', span: 0.7 },
+        { r: R * 0.78, speed: 0.4, width: 2.2, color: 'rgba(180,140,255,0.75)', span: 1.1 },
+        { r: R * 0.62, speed: -0.6, width: 1.6, color: 'rgba(109,91,255,0.6)', span: 2.0 },
+        { r: R * 0.46, speed: 0.8, width: 1.2, color: 'rgba(180,140,255,0.4)', span: 0.7 },
       ];
       arcs.forEach((a) => {
         ctx.save();
@@ -72,9 +72,9 @@ export default function AICore() {
       const pulse = 1 + Math.sin(t * 1.8) * 0.06;
       const coreR = R * 0.22 * pulse;
       const grad = ctx.createRadialGradient(cx, cy, 0, cx, cy, coreR * 3.2);
-      grad.addColorStop(0, 'rgba(0,232,255,0.9)');
-      grad.addColorStop(0.35, 'rgba(45,107,255,0.35)');
-      grad.addColorStop(1, 'rgba(45,107,255,0)');
+      grad.addColorStop(0, 'rgba(180,140,255,0.9)');
+      grad.addColorStop(0.35, 'rgba(109,91,255,0.35)');
+      grad.addColorStop(1, 'rgba(109,91,255,0)');
       ctx.beginPath();
       ctx.arc(cx, cy, coreR * 3.2, 0, Math.PI * 2);
       ctx.fillStyle = grad;
@@ -83,7 +83,7 @@ export default function AICore() {
       ctx.beginPath();
       ctx.arc(cx, cy, coreR, 0, Math.PI * 2);
       ctx.fillStyle = '#eafcff';
-      ctx.shadowColor = 'rgba(0,232,255,0.9)';
+      ctx.shadowColor = 'rgba(180,140,255,0.9)';
       ctx.shadowBlur = 24;
       ctx.fill();
       ctx.shadowBlur = 0;
@@ -95,7 +95,7 @@ export default function AICore() {
         const ny = cy + Math.sin(ang) * r;
         ctx.beginPath();
         ctx.arc(nx, ny, 2.6, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(0,232,255,0.85)';
+        ctx.fillStyle = 'rgba(180,140,255,0.85)';
         ctx.fill();
       }
 

@@ -5,21 +5,24 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        bg: '#04060c',
-        panel: '#0a0f1c',
-        border: '#1c2740',
-        blue: '#2d6bff',
-        cyan: '#00e8ff',
-        steel: '#7c8da6',
-        steelDim: '#4a5872',
-        text: '#e8f0ff',
-        red: '#ff3a55',
-        green: '#20e3a2',
+        bg: '#05060f',
+        panel: '#0c0e1e',
+        border: '#20223a',
+        blue: '#6d5bff',
+        cyan: '#b48cff',
+        steel: '#9396b8',
+        steelDim: '#5b5f80',
+        text: '#f1f0fb',
+        red: '#ff5577',
+        green: '#2ee6a8',
       },
       fontFamily: {
         display: ['var(--font-chakra)', 'sans-serif'],
         body: ['var(--font-inter)', 'sans-serif'],
         mono: ['var(--font-mono)', 'monospace'],
+      },
+      boxShadow: {
+        glow: '0 8px 40px -8px rgba(109, 91, 255, 0.35)',
       },
       keyframes: {
         riseIn: {

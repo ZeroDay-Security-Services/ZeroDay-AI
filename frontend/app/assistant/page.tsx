@@ -56,6 +56,7 @@ const AGENT_COLORS: Record<string, { dot: string; bg: string; border: string; te
   reconnaissance:       { dot: 'bg-teal-400',    bg: 'bg-teal-400/10',    border: 'border-teal-400/40',    text: 'text-teal-400'    },
   security_automation:  { dot: 'bg-green',       bg: 'bg-green/10',       border: 'border-green/40',       text: 'text-green'       },
 };
+const DEFAULT_AGENT_COLOR = AGENT_COLORS.assistant!;
 
 const AGENT_ICONS: Record<string, string> = {
   master:               '◈',
@@ -145,7 +146,7 @@ function AuthPanel({ onAuth }: { onAuth: (token: string) => void }) {
       <div className="w-full max-w-[400px]">
         {/* Icon */}
         <div className="mb-6 flex justify-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-cyan/30 bg-cyan/5 text-3xl text-cyan shadow-[0_0_32px_rgba(0,232,255,0.1)]">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-cyan/30 bg-cyan/5 text-3xl text-cyan shadow-[0_0_32px_rgba(180,140,255,0.1)]">
             ◈
           </div>
         </div>
@@ -169,7 +170,7 @@ function AuthPanel({ onAuth }: { onAuth: (token: string) => void }) {
               onClick={() => { setMode(m); setErr(null); }}
               className={`flex-1 rounded-lg py-2 font-mono text-[11px] uppercase tracking-wider transition-all ${
                 mode === m
-                  ? 'bg-cyan/10 text-cyan shadow-[inset_0_0_12px_rgba(0,232,255,0.05)]'
+                  ? 'bg-cyan/10 text-cyan shadow-[inset_0_0_12px_rgba(180,140,255,0.05)]'
                   : 'text-steelDim hover:text-steel'
               }`}
             >
@@ -193,7 +194,7 @@ function AuthPanel({ onAuth }: { onAuth: (token: string) => void }) {
                 placeholder="John Doe"
                 required
                 minLength={1}
-                className="w-full rounded-xl border border-border bg-[#04060c] px-4 py-3 font-mono text-[13px] text-text placeholder:text-steelDim focus:border-cyan/50 focus:outline-none focus:shadow-[0_0_0_3px_rgba(0,232,255,0.08)] transition-all"
+                className="w-full rounded-xl border border-border bg-[#04060c] px-4 py-3 font-mono text-[13px] text-text placeholder:text-steelDim focus:border-cyan/50 focus:outline-none focus:shadow-[0_0_0_3px_rgba(180,140,255,0.08)] transition-all"
               />
             </div>
           )}
@@ -207,7 +208,7 @@ function AuthPanel({ onAuth }: { onAuth: (token: string) => void }) {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="analyst@zeroday.dev"
               required
-              className="w-full rounded-xl border border-border bg-[#04060c] px-4 py-3 font-mono text-[13px] text-text placeholder:text-steelDim focus:border-cyan/50 focus:outline-none focus:shadow-[0_0_0_3px_rgba(0,232,255,0.08)] transition-all"
+              className="w-full rounded-xl border border-border bg-[#04060c] px-4 py-3 font-mono text-[13px] text-text placeholder:text-steelDim focus:border-cyan/50 focus:outline-none focus:shadow-[0_0_0_3px_rgba(180,140,255,0.08)] transition-all"
             />
           </div>
           <div>
@@ -224,7 +225,7 @@ function AuthPanel({ onAuth }: { onAuth: (token: string) => void }) {
               placeholder="••••••••"
               required
               minLength={mode === 'register' ? 8 : 1}
-              className="w-full rounded-xl border border-border bg-[#04060c] px-4 py-3 font-mono text-[13px] text-text placeholder:text-steelDim focus:border-cyan/50 focus:outline-none focus:shadow-[0_0_0_3px_rgba(0,232,255,0.08)] transition-all"
+              className="w-full rounded-xl border border-border bg-[#04060c] px-4 py-3 font-mono text-[13px] text-text placeholder:text-steelDim focus:border-cyan/50 focus:outline-none focus:shadow-[0_0_0_3px_rgba(180,140,255,0.08)] transition-all"
             />
           </div>
 
@@ -458,7 +459,7 @@ export default function AssistantPage() {
     }
   }
 
-  const agentColor = AGENT_COLORS[selectedAgent] ?? AGENT_COLORS.assistant;
+  const agentColor = AGENT_COLORS[selectedAgent] ?? DEFAULT_AGENT_COLOR;
   const currentAgent = selectedAgent === 'assistant'
     ? { id: 'assistant', name: 'General Assistant', description: 'Multi-domain AI security analyst' }
     : agents.find((a) => a.id === selectedAgent) ?? agents[0];
@@ -661,7 +662,7 @@ export default function AssistantPage() {
                     rows={2}
                     className={`flex-1 resize-none rounded-xl border bg-[#070c18] px-4 py-3 font-mono text-[13px] text-text placeholder:text-steelDim focus:outline-none transition-all ${
                       input.trim()
-                        ? `${agentColor.border} focus:shadow-[0_0_0_3px_rgba(0,232,255,0.06)]`
+                        ? `${agentColor.border} focus:shadow-[0_0_0_3px_rgba(180,140,255,0.06)]`
                         : 'border-border focus:border-cyan/40'
                     }`}
                   />
@@ -699,7 +700,7 @@ function AgentSidebarItem({
   selected: boolean;
   onSelect: (id: string) => void;
 }) {
-  const c = AGENT_COLORS[id] ?? AGENT_COLORS.assistant;
+  const c = AGENT_COLORS[id] ?? DEFAULT_AGENT_COLOR;
 
   return (
     <button
@@ -765,9 +766,11 @@ const EXAMPLES: Record<string, string[]> = {
   ],
 };
 
+const DEFAULT_EXAMPLES = EXAMPLES.assistant ?? [];
+
 function ExamplePrompts({ agentId, onSelect }: { agentId: string; onSelect: (p: string) => void }) {
-  const prompts = EXAMPLES[agentId] ?? EXAMPLES.assistant;
-  const c = AGENT_COLORS[agentId] ?? AGENT_COLORS.assistant;
+  const prompts = EXAMPLES[agentId] ?? DEFAULT_EXAMPLES;
+  const c = AGENT_COLORS[agentId] ?? DEFAULT_AGENT_COLOR;
 
   return (
     <div className="space-y-2">

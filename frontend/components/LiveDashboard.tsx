@@ -13,12 +13,12 @@ type Widget = {
 
 const initialWidgets: Widget[] = [
   { label: 'AI Status', value: 'ONLINE', state: 'ok', icon: '⬡', accent: 'from-green/20 to-transparent border-green/20', glow: 'shadow-[0_0_20px_rgba(32,227,162,0.08)]' },
-  { label: 'Threat Feed', value: 'Connected', state: 'ok', icon: '◈', accent: 'from-cyan/20 to-transparent border-cyan/20', glow: 'shadow-[0_0_20px_rgba(0,232,255,0.08)]' },
-  { label: 'Security Intel', value: 'Active', state: 'ok', icon: '◉', accent: 'from-blue/20 to-transparent border-blue/20', glow: 'shadow-[0_0_20px_rgba(45,107,255,0.08)]' },
+  { label: 'Threat Feed', value: 'Connected', state: 'ok', icon: '◈', accent: 'from-cyan/20 to-transparent border-cyan/20', glow: 'shadow-[0_0_20px_rgba(180,140,255,0.08)]' },
+  { label: 'Security Intel', value: 'Active', state: 'ok', icon: '◉', accent: 'from-blue/20 to-transparent border-blue/20', glow: 'shadow-[0_0_20px_rgba(109,91,255,0.08)]' },
   { label: 'AI Agents', value: '8 Active', state: 'ok', icon: '⬟', accent: 'from-purple-500/20 to-transparent border-purple-500/20', glow: 'shadow-[0_0_20px_rgba(168,85,247,0.08)]' },
   { label: 'Memory', value: '14.2 GB', state: 'info', icon: '⬠', accent: 'from-amber-400/20 to-transparent border-amber-400/20', glow: 'shadow-[0_0_20px_rgba(251,191,36,0.08)]' },
   { label: 'Automation Jobs', value: 'Running', state: 'ok', icon: '◆', accent: 'from-green/20 to-transparent border-green/20', glow: 'shadow-[0_0_20px_rgba(32,227,162,0.08)]' },
-  { label: 'Last Scan', value: '2 seconds ago', state: 'info', icon: '◇', accent: 'from-cyan/20 to-transparent border-cyan/20', glow: 'shadow-[0_0_20px_rgba(0,232,255,0.08)]' },
+  { label: 'Last Scan', value: '2 seconds ago', state: 'info', icon: '◇', accent: 'from-cyan/20 to-transparent border-cyan/20', glow: 'shadow-[0_0_20px_rgba(180,140,255,0.08)]' },
   { label: 'System Health', value: '99.98%', state: 'ok', icon: '△', accent: 'from-green/20 to-transparent border-green/20', glow: 'shadow-[0_0_20px_rgba(32,227,162,0.08)]' },
 ];
 

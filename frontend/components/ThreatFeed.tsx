@@ -57,7 +57,7 @@ export default function ThreatFeed() {
         </p>
       </div>
 
-      <div className="mx-auto max-w-[1200px] overflow-hidden rounded-xl border border-border bg-[#0b111e]">
+      <div className="mx-auto max-w-[1200px] overflow-hidden rounded-2xl border border-border bg-[#0c0e1e]">
         <div className="flex items-center gap-2 border-b border-border bg-white/[0.015] px-4.5 py-3">
           <div className="h-2.5 w-2.5 rounded-full bg-[#ff5f57]" />
           <div className="h-2.5 w-2.5 rounded-full bg-[#febc2e]" />

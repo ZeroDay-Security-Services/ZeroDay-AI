@@ -66,7 +66,7 @@ export default function Intelligence() {
         {stats.map((s) => (
           <div
             key={s.label}
-            className="glass-panel rounded-2xl px-6 py-5 text-center transition-all duration-300 hover:-translate-y-1 hover:border-cyan/30 hover:shadow-[0_8px_28px_rgba(0,232,255,0.08)]"
+            className="glass-panel rounded-2xl px-6 py-5 text-center transition-all duration-300 hover:-translate-y-1 hover:border-cyan/30 hover:shadow-[0_8px_28px_rgba(180,140,255,0.08)]"
           >
             <div className="mb-1 font-display text-[26px] font-bold text-cyan">{s.value}</div>
             <div className="font-mono text-[11px] uppercase tracking-wider text-steel">{s.label}</div>

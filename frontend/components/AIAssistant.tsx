@@ -106,7 +106,7 @@ function AuthPanel({ onAuth }: { onAuth: (token: string) => void }) {
               onClick={() => { setMode(m); setErr(null); }}
               className={`flex-1 rounded-lg py-2 font-mono text-[11px] uppercase tracking-wider transition-all ${
                 mode === m
-                  ? 'bg-cyan/10 text-cyan shadow-[0_0_12px_rgba(0,232,255,0.08)]'
+                  ? 'bg-cyan/10 text-cyan shadow-[0_0_12px_rgba(180,140,255,0.08)]'
                   : 'text-steelDim hover:text-steel'
               }`}
             >
@@ -127,7 +127,7 @@ function AuthPanel({ onAuth }: { onAuth: (token: string) => void }) {
               onChange={(e) => setEmail(e.target.value)}
               placeholder="analyst@zeroday.dev"
               required
-              className="w-full rounded-xl border border-border bg-[#04060c] px-4 py-3 font-mono text-[13px] text-text placeholder:text-steelDim focus:border-cyan/50 focus:outline-none focus:shadow-[0_0_0_3px_rgba(0,232,255,0.08)] transition-all"
+              className="w-full rounded-xl border border-border bg-[#04060c] px-4 py-3 font-mono text-[13px] text-text placeholder:text-steelDim focus:border-cyan/50 focus:outline-none focus:shadow-[0_0_0_3px_rgba(180,140,255,0.08)] transition-all"
             />
           </div>
           <div>
@@ -140,7 +140,7 @@ function AuthPanel({ onAuth }: { onAuth: (token: string) => void }) {
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
               required
-              className="w-full rounded-xl border border-border bg-[#04060c] px-4 py-3 font-mono text-[13px] text-text placeholder:text-steelDim focus:border-cyan/50 focus:outline-none focus:shadow-[0_0_0_3px_rgba(0,232,255,0.08)] transition-all"
+              className="w-full rounded-xl border border-border bg-[#04060c] px-4 py-3 font-mono text-[13px] text-text placeholder:text-steelDim focus:border-cyan/50 focus:outline-none focus:shadow-[0_0_0_3px_rgba(180,140,255,0.08)] transition-all"
             />
           </div>
 
@@ -346,7 +346,7 @@ export default function AIAssistant() {
                   onClick={() => { setSelectedAgent('assistant'); reset(); }}
                   className={`font-mono text-[10.5px] uppercase tracking-wider px-3.5 py-1.5 rounded-full border transition-all ${
                     selectedAgent === 'assistant'
-                      ? 'border-cyan text-cyan bg-cyan/10 shadow-[0_0_12px_rgba(0,232,255,0.1)]'
+                      ? 'border-cyan text-cyan bg-cyan/10 shadow-[0_0_12px_rgba(180,140,255,0.1)]'
                       : 'border-border text-steelDim hover:border-cyan/40 hover:text-cyan'
                   }`}
                 >
@@ -360,7 +360,7 @@ export default function AIAssistant() {
                     title={a.description}
                     className={`font-mono text-[10.5px] uppercase tracking-wider px-3.5 py-1.5 rounded-full border transition-all ${
                       selectedAgent === a.id
-                        ? 'border-cyan text-cyan bg-cyan/10 shadow-[0_0_12px_rgba(0,232,255,0.1)]'
+                        ? 'border-cyan text-cyan bg-cyan/10 shadow-[0_0_12px_rgba(180,140,255,0.1)]'
                         : 'border-border text-steelDim hover:border-cyan/40 hover:text-cyan'
                     }`}
                   >
@@ -450,7 +450,7 @@ export default function AIAssistant() {
                 onKeyDown={handleKey}
                 placeholder="Ask ZeroDay AI… (Enter to send, Shift+Enter for new line)"
                 rows={2}
-                className="flex-1 resize-none rounded-xl border border-border bg-[#04060c] px-4 py-3 font-mono text-[13px] text-text placeholder:text-steelDim focus:border-cyan/50 focus:outline-none focus:shadow-[0_0_0_3px_rgba(0,232,255,0.06)] transition-all"
+                className="flex-1 resize-none rounded-xl border border-border bg-[#04060c] px-4 py-3 font-mono text-[13px] text-text placeholder:text-steelDim focus:border-cyan/50 focus:outline-none focus:shadow-[0_0_0_3px_rgba(180,140,255,0.06)] transition-all"
               />
               <button
                 type="button"
