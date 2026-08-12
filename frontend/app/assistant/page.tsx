@@ -308,9 +308,11 @@ function MessageBubble({ msg, agentColor }: { msg: Message; agentColor: typeof A
           {isUser ? (
             <pre className="whitespace-pre-wrap font-[inherit]">{msg.content}</pre>
           ) : (
-            <ReactMarkdown className="markdown-body" remarkPlugins={[remarkGfm]}>
-              {msg.content}
-            </ReactMarkdown>
+            <div className="markdown-body">
+              <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                {msg.content}
+              </ReactMarkdown>
+            </div>
           )}
         </div>
 
