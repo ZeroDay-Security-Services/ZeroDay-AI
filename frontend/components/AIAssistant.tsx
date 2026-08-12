@@ -202,6 +202,45 @@ export default function AIAssistant() {
       .catch(() => {});
   }, [token]);
 
+  // Load chat history when authenticated
+  useEffect(() => {
+    if (!token) return;
+    
+    async function loadHistory() {
+      try {
+        const listRes = await fetch(`${BASE}/api/v1/assistant/conversations`, {
+          headers: { Authorization: `Bearer ${token}` }
+        });
+        if (!listRes.ok) return;
+        const convos = await listRes.json();
+        
+        if (convos && convos.length > 0) {
+          const latestId = convos[0].id;
+          const detailRes = await fetch(`${BASE}/api/v1/assistant/conversations/${latestId}`, {
+            headers: { Authorization: `Bearer ${token}` }
+          });
+          if (!detailRes.ok) return;
+          
+          const detail = await detailRes.json();
+          setConversationId(detail.id);
+          setMessages(detail.messages.map((m: any) => ({
+            role: m.role,
+            content: Array.isArray(m.content) 
+              ? m.content.map((c: any) => c.text || '').join('') 
+              : String(m.content)
+          })));
+        }
+      } catch (err) {
+        console.error('Failed to load history', err);
+      }
+    }
+    
+    // Only load if we don't already have an active conversation
+    if (!conversationId && messages.length === 0) {
+      loadHistory();
+    }
+  }, [token, conversationId, messages.length]);
+
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
