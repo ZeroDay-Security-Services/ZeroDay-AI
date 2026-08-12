@@ -7,6 +7,7 @@ import ThreatFeed from '@/components/ThreatFeed';
 import Agents from '@/components/Agents';
 import LiveDashboard from '@/components/LiveDashboard';
 import TechStack from '@/components/TechStack';
+import About from '@/components/About';
 import Footer from '@/components/Footer';
 
 /**
@@ -33,7 +34,7 @@ export default function HomePage() {
         <Nav />
 
         {/* ── HERO ─────────────────────────────────────── */}
-        <section id="home">
+        <section id="home" className="scroll-mt-20">
           <Hero />
         </section>
 
@@ -55,7 +56,9 @@ export default function HomePage() {
         {/* ── DOCUMENTATION / TECH STACK ───────────────── */}
         <TechStack />
 
-        {/* ── ABOUT / FOOTER ───────────────────────────── */}
+        {/* ── ABOUT ─────────────────────────────────────── */}
+        <About />
+
         <Footer />
       </div>
     </>

@@ -62,15 +62,8 @@ export default function LiveDashboard() {
   }, []);
 
   return (
-    <section id="dashboard" className="px-8 py-24">
-      {/* Section separator */}
-      <div className="mx-auto mb-16 max-w-[1200px]">
-        <div className="mb-16 flex items-center gap-4">
-          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
-          <span className="font-mono text-[10px] uppercase tracking-widest text-steelDim">Live Telemetry</span>
-          <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
-        </div>
-
+    <section id="dashboard" className="scroll-mt-20 px-8 py-20">
+      <div className="mx-auto max-w-[1200px]">
         <div className="mb-12 text-center">
           <span className="mb-3.5 block font-mono text-[11px] uppercase tracking-widest text-cyan">
             Live System Dashboard

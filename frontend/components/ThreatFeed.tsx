@@ -44,7 +44,7 @@ export default function ThreatFeed() {
   }, []);
 
   return (
-    <section id="detection" className="px-8 py-24">
+    <section id="detection" className="scroll-mt-20 px-8 py-20">
       <div className="mx-auto mb-14 max-w-[640px]">
         <span className="mb-3.5 block font-mono text-[11px] uppercase tracking-widest text-cyan">
           Live Threat Feed

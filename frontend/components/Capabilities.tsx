@@ -57,8 +57,8 @@ const capabilities = [
 
 export default function Capabilities() {
   return (
-    <section id="capabilities" className="px-8 py-24">
-      <div className="mx-auto mb-16 max-w-[640px] text-center">
+    <section id="capabilities" className="scroll-mt-20 px-8 py-20">
+      <div className="mx-auto mb-12 max-w-[640px] text-center">
         <span className="mb-3.5 block font-mono text-[11px] uppercase tracking-widest text-cyan">
           AI Intelligence Modules
         </span>

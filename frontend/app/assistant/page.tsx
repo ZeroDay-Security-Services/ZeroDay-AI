@@ -519,12 +519,18 @@ export default function AssistantPage() {
       <div className="flex flex-1 overflow-hidden">
 
         {/* ── LEFT SIDEBAR — Agent selector ────────────────── */}
-        <aside className="hidden w-[220px] flex-shrink-0 flex-col border-r border-border bg-[#060b16] md:flex">
-          <div className="border-b border-border px-4 py-3">
-            <span className="font-mono text-[9.5px] uppercase tracking-widest text-steelDim">Agents</span>
+        <aside className="hidden w-[280px] flex-shrink-0 flex-col border-r border-border bg-[#060b16] md:flex">
+          <div className="border-b border-border px-5 py-4">
+            <span className="font-mono text-[10.5px] uppercase tracking-widest text-steelDim">
+              Agents
+            </span>
+            <div className="mt-1 flex items-center gap-1.5">
+              <span className="w-dot w-dot-ok" style={{ width: 5, height: 5 }} />
+              <span className="font-mono text-[10px] text-steel">{agents.length + 1} available</span>
+            </div>
           </div>
 
-          <nav className="flex-1 overflow-y-auto p-2 space-y-1">
+          <nav className="flex-1 overflow-y-auto p-3 space-y-2">
             {/* General assistant option */}
             <AgentSidebarItem
               id="assistant"
@@ -535,30 +541,34 @@ export default function AssistantPage() {
             />
 
             {/* Separator */}
-            <div className="mx-2 my-2 border-t border-border" />
-            <p className="px-3 py-1 font-mono text-[9px] uppercase tracking-widest text-steelDim">Specialists</p>
+            <div className="mx-1 my-3 border-t border-border" />
+            <p className="mb-1 px-3 font-mono text-[10px] uppercase tracking-widest text-steelDim">
+              Specialists
+            </p>
 
             {/* Specialist agents */}
-            {agents.map((a) => (
-              <AgentSidebarItem
-                key={a.id}
-                id={a.id}
-                name={a.name}
-                description={a.description}
-                selected={selectedAgent === a.id}
-                onSelect={selectAgent}
-              />
-            ))}
+            <div className="space-y-2">
+              {agents.map((a) => (
+                <AgentSidebarItem
+                  key={a.id}
+                  id={a.id}
+                  name={a.name}
+                  description={a.description}
+                  selected={selectedAgent === a.id}
+                  onSelect={selectAgent}
+                />
+              ))}
+            </div>
           </nav>
 
           {/* Sidebar footer — backend status */}
-          <div className="border-t border-border p-4">
-            <div className="font-mono text-[9.5px] text-steelDim">
-              <div className="flex items-center gap-1.5 mb-1">
+          <div className="border-t border-border p-5">
+            <div className="font-mono text-[10px] text-steelDim space-y-2">
+              <div className="flex items-center gap-2">
                 <span className="w-dot w-dot-ok" style={{ width: 5, height: 5 }} />
                 Backend connected
               </div>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-2">
                 <span className="w-dot w-dot-info" style={{ width: 5, height: 5 }} />
                 Groq LLM active
               </div>
@@ -706,25 +716,27 @@ function AgentSidebarItem({
     <button
       type="button"
       onClick={() => onSelect(id)}
-      className={`group w-full rounded-xl px-3 py-2.5 text-left transition-all duration-150 ${
+      className={`group w-full rounded-xl px-3.5 py-3 text-left transition-all duration-150 ${
         selected
           ? `${c.bg} border ${c.border}`
           : 'border border-transparent hover:bg-white/[0.03] hover:border-border'
       }`}
     >
-      <div className="flex items-center gap-2.5">
-        <span className={`text-[15px] ${selected ? c.text : 'text-steelDim group-hover:text-steel'}`}>
+      <div className="flex items-center gap-3">
+        <span
+          className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border text-[16px] ${
+            selected ? `${c.border} ${c.bg} ${c.text}` : 'border-border text-steelDim group-hover:text-steel'
+          }`}
+        >
           {AGENT_ICONS[id] ?? '◈'}
         </span>
-        <span className={`font-mono text-[11px] font-medium leading-tight ${selected ? c.text : 'text-steel'}`}>
+        <span className={`font-mono text-[12px] font-medium leading-tight ${selected ? c.text : 'text-steel'}`}>
           {name}
         </span>
       </div>
-      {selected && (
-        <p className="mt-1.5 pl-7 font-mono text-[9.5px] leading-relaxed text-steelDim">
-          {description}
-        </p>
-      )}
+      <p className="mt-2 line-clamp-2 pl-11 font-mono text-[10px] leading-relaxed text-steelDim">
+        {description}
+      </p>
     </button>
   );
 }

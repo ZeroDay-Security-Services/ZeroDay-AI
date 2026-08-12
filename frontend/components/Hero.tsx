@@ -68,7 +68,7 @@ export default function Hero() {
       </div>
 
       {/* Floating feature pills — mirrors a product screenshot's callouts */}
-      <div className="relative z-[1] mx-auto mt-4 flex max-w-[1100px] flex-wrap items-center justify-center gap-4 px-6 pb-24 sm:gap-6 sm:px-8">
+      <div className="relative z-[1] mx-auto flex max-w-[1200px] flex-wrap items-center justify-start gap-4 px-6 pb-20 sm:gap-6 sm:px-8">
         {badges.map((b) => (
           <span
             key={b}

@@ -47,15 +47,8 @@ const columns = [
 
 export default function TechStack() {
   return (
-    <section id="stack" className="px-8 py-24">
-      {/* Section separator */}
-      <div className="mx-auto mb-16 max-w-[1200px] flex items-center gap-4">
-        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
-        <span className="font-mono text-[10px] uppercase tracking-widest text-steelDim">Architecture</span>
-        <div className="h-px flex-1 bg-gradient-to-r from-transparent via-border to-transparent" />
-      </div>
-
-      <div className="mx-auto mb-14 max-w-[640px] text-center">
+    <section id="stack" className="scroll-mt-20 px-8 py-20">
+      <div className="mx-auto mb-12 max-w-[640px] text-center">
         <span className="mb-3.5 block font-mono text-[11px] uppercase tracking-widest text-cyan">
           Documentation
         </span>

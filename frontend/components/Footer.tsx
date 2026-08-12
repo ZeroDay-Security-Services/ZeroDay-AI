@@ -3,7 +3,7 @@ import logo from '@/public/logo.png';
 
 export default function Footer() {
   return (
-    <footer id="about" className="mt-10 border-t border-border px-8 pb-10 pt-[70px]">
+    <footer className="mt-10 border-t border-border px-8 pb-10 pt-[70px]">
       <div className="mx-auto flex max-w-[1200px] flex-wrap items-end justify-between gap-7">
         <div className="flex items-center gap-3.5">
           <Image src={logo} alt="ZeroDay Security Services logo" height={40} width={40} className="object-contain" />
