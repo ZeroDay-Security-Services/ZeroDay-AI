@@ -3,6 +3,8 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import logo from '@/public/logo.png';
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -303,7 +305,13 @@ function MessageBubble({ msg, agentColor }: { msg: Message; agentColor: typeof A
               : `border text-text rounded-tl-sm ${agentColor.bg} ${agentColor.border}`
           }`}
         >
-          <pre className="whitespace-pre-wrap font-[inherit]">{msg.content}</pre>
+          {isUser ? (
+            <pre className="whitespace-pre-wrap font-[inherit]">{msg.content}</pre>
+          ) : (
+            <ReactMarkdown className="markdown-body" remarkPlugins={[remarkGfm]}>
+              {msg.content}
+            </ReactMarkdown>
+          )}
         </div>
 
         {/* Timestamp for user messages */}
