@@ -1,11 +1,12 @@
-'use client';
+﻿'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 type Message = {
   id: string;
   role: 'user' | 'assistant';
   content: string;
+  agentName?: string;
   toolCallsMade?: number;
 };
 
@@ -50,12 +51,9 @@ function AuthPanel({ onAuth }: { onAuth: (token: string) => void }) {
         });
         if (!r.ok) {
           const d = await r.json().catch(() => ({}));
-          throw new Error(d?.detail ?? d?.error?.message ?? `Registration failed (${r.status})`);
+          throw new Error(d?.error?.message ?? 'Registration failed');
         }
-        // Auto-login after register
-        setMode('login');
       }
-
       const r = await fetch(`${BASE}/api/v1/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -63,13 +61,11 @@ function AuthPanel({ onAuth }: { onAuth: (token: string) => void }) {
       });
       if (!r.ok) {
         const d = await r.json().catch(() => ({}));
-        throw new Error(d?.detail ?? d?.error?.message ?? `Login failed (${r.status})`);
+        throw new Error(d?.error?.message ?? 'Invalid email or password');
       }
-      const d = await r.json();
-      const token = d.access_token ?? d.token;
-      if (!token) throw new Error('No token in response');
-      saveToken(token);
-      onAuth(token);
+      const { access_token } = await r.json();
+      saveToken(access_token);
+      onAuth(access_token);
     } catch (e: unknown) {
       setErr(e instanceof Error ? e.message : 'Request failed');
     } finally {
@@ -78,87 +74,44 @@ function AuthPanel({ onAuth }: { onAuth: (token: string) => void }) {
   }
 
   return (
-    <div className="flex flex-1 items-center justify-center px-6 py-16">
-      <div className="w-full max-w-[420px]">
-        {/* Header */}
-        <div className="mb-8 text-center">
-          <div className="mb-3 flex justify-center">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-cyan/30 bg-cyan/10 text-2xl text-cyan">
-              ◈
-            </div>
-          </div>
-          <h3 className="mb-1.5 font-display text-[22px] font-bold text-text">
-            {mode === 'login' ? 'Sign in to ZeroDay AI' : 'Create your account'}
+    <div className="flex flex-1 flex-col items-center justify-center p-8">
+      <div className="w-full max-w-sm">
+        <div className="mb-6 text-center">
+          <span className="font-mono text-[10px] uppercase tracking-widest text-cyan">
+            {mode === 'login' ? 'Sign in to continue' : 'Create your account'}
+          </span>
+          <h3 className="mt-2 font-display text-[20px] font-bold text-text">
+            ZeroDay AI Console
           </h3>
-          <p className="font-mono text-[12px] text-steelDim">
-            {mode === 'login'
-              ? 'Authenticate to access the AI security console'
-              : 'Free account — no credit card required'}
-          </p>
         </div>
-
-        {/* Tab switcher */}
-        <div className="mb-6 flex rounded-xl border border-border bg-[#04060c] p-1">
-          {(['login', 'register'] as const).map((m) => (
-            <button
-              key={m}
-              type="button"
-              onClick={() => { setMode(m); setErr(null); }}
-              className={`flex-1 rounded-lg py-2 font-mono text-[11px] uppercase tracking-wider transition-all ${
-                mode === m
-                  ? 'bg-cyan/10 text-cyan shadow-[0_0_12px_rgba(180,140,255,0.08)]'
-                  : 'text-steelDim hover:text-steel'
-              }`}
-            >
-              {m === 'login' ? 'Sign In' : 'Register'}
-            </button>
-          ))}
-        </div>
-
-        {/* Form */}
-        <form onSubmit={submit} className="space-y-4">
-          <div>
-            <label className="mb-1.5 block font-mono text-[10.5px] uppercase tracking-wider text-steel">
-              Email
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="analyst@zeroday.dev"
-              required
-              className="w-full rounded-xl border border-border bg-[#04060c] px-4 py-3 font-mono text-[13px] text-text placeholder:text-steelDim focus:border-cyan/50 focus:outline-none focus:shadow-[0_0_0_3px_rgba(180,140,255,0.08)] transition-all"
-            />
-          </div>
-          <div>
-            <label className="mb-1.5 block font-mono text-[10.5px] uppercase tracking-wider text-steel">
-              Password
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="••••••••"
-              required
-              className="w-full rounded-xl border border-border bg-[#04060c] px-4 py-3 font-mono text-[13px] text-text placeholder:text-steelDim focus:border-cyan/50 focus:outline-none focus:shadow-[0_0_0_3px_rgba(180,140,255,0.08)] transition-all"
-            />
-          </div>
-
+        <form onSubmit={submit} className="space-y-3">
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email address"
+            required
+            className="w-full rounded-xl border border-border bg-[#04060c] px-4 py-2.5 font-mono text-[13px] text-text placeholder:text-steelDim focus:border-cyan/50 focus:outline-none"
+          />
+          <input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Password"
+            required
+            className="w-full rounded-xl border border-border bg-[#04060c] px-4 py-2.5 font-mono text-[13px] text-text placeholder:text-steelDim focus:border-cyan/50 focus:outline-none"
+          />
           {err && (
-            <div className="rounded-xl border border-red/20 bg-red/5 px-4 py-3 font-mono text-[11.5px] text-red">
-              ⚠ {err}
-            </div>
+            <p className="font-mono text-[11px] text-red">{err}</p>
           )}
-
           <button
             type="submit"
             disabled={busy}
             className="btn btn-primary w-full justify-center disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {busy ? 'Please wait…' : mode === 'login' ? 'Sign In →' : 'Create Account →'}
+            {busy ? 'Please wait...' : mode === 'login' ? 'Sign In' : 'Create Account'}
           </button>
         </form>
-
         <p className="mt-5 text-center font-mono text-[11px] text-steelDim">
           {mode === 'login' ? "Don't have an account? " : 'Already have an account? '}
           <button
@@ -182,10 +135,12 @@ export default function AIAssistant() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [conversationId, setConversationId] = useState<string | null>(null);
+  // Per-agent conversation IDs: agentId -> conversationId
+  const [convIds, setConvIds] = useState<Record<string, string>>({});
   const [agents, setAgents] = useState<Agent[]>([]);
   const [selectedAgent, setSelectedAgent] = useState<string>('assistant');
   const [error, setError] = useState<string | null>(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
 
   // Restore token from localStorage on mount
@@ -202,44 +157,65 @@ export default function AIAssistant() {
       .catch(() => {});
   }, [token]);
 
-  // Load chat history when authenticated
+  // Load history for the currently selected agent
+  const loadAgentHistory = useCallback(async (agentId: string, tok: string) => {
+    setHistoryLoading(true);
+    setMessages([]);
+    setError(null);
+    try {
+      let listUrl: string;
+      let detailUrlPrefix: string;
+
+      if (agentId === 'assistant') {
+        listUrl = `${BASE}/api/v1/assistant/conversations?agent_id=assistant`;
+        detailUrlPrefix = `${BASE}/api/v1/assistant/conversations/`;
+      } else {
+        listUrl = `${BASE}/api/v1/agents/conversations?agent=${agentId}`;
+        detailUrlPrefix = `${BASE}/api/v1/agents/conversations/`;
+      }
+
+      const listRes = await fetch(listUrl, { headers: { Authorization: `Bearer ${tok}` } });
+      if (!listRes.ok) return;
+      const convos = await listRes.json();
+      if (!convos || convos.length === 0) return;
+
+      const latestId = convos[0].id;
+      const detailRes = await fetch(`${detailUrlPrefix}${latestId}`, {
+        headers: { Authorization: `Bearer ${tok}` },
+      });
+      if (!detailRes.ok) return;
+
+      const detail = await detailRes.json();
+      // Save the conversation ID for this agent
+      setConvIds((prev) => ({ ...prev, [agentId]: detail.id }));
+
+      // Determine agent display name
+      const agentName = agentId === 'assistant' ? 'General Assistant' : detail.agent_id;
+
+      setMessages(
+        detail.messages
+          .filter((m: any) => m.role === 'user' || m.role === 'assistant')
+          .map((m: any, i: number) => ({
+            id: `hist-${i}`,
+            role: m.role,
+            agentName: m.role === 'assistant' ? agentName : undefined,
+            content: Array.isArray(m.content)
+              ? m.content.map((c: any) => c.text || '').join('')
+              : String(m.content),
+          }))
+      );
+    } catch (e) {
+      console.error('Failed to load history', e);
+    } finally {
+      setHistoryLoading(false);
+    }
+  }, []);
+
+  // Load history whenever token or selected agent changes
   useEffect(() => {
     if (!token) return;
-    
-    async function loadHistory() {
-      try {
-        const listRes = await fetch(`${BASE}/api/v1/assistant/conversations`, {
-          headers: { Authorization: `Bearer ${token}` }
-        });
-        if (!listRes.ok) return;
-        const convos = await listRes.json();
-        
-        if (convos && convos.length > 0) {
-          const latestId = convos[0].id;
-          const detailRes = await fetch(`${BASE}/api/v1/assistant/conversations/${latestId}`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          if (!detailRes.ok) return;
-          
-          const detail = await detailRes.json();
-          setConversationId(detail.id);
-          setMessages(detail.messages.map((m: any) => ({
-            role: m.role,
-            content: Array.isArray(m.content) 
-              ? m.content.map((c: any) => c.text || '').join('') 
-              : String(m.content)
-          })));
-        }
-      } catch (err) {
-        console.error('Failed to load history', err);
-      }
-    }
-    
-    // Only load if we don't already have an active conversation
-    if (!conversationId && messages.length === 0) {
-      loadHistory();
-    }
-  }, [token, conversationId, messages.length]);
+    loadAgentHistory(selectedAgent, token);
+  }, [token, selectedAgent, loadAgentHistory]);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -253,12 +229,18 @@ export default function AIAssistant() {
     clearToken();
     setToken(null);
     setMessages([]);
-    setConversationId(null);
+    setConvIds({});
+    setError(null);
   }
 
-  function reset() {
+  function newSession() {
+    // Clear conversation ID for current agent to start fresh
+    setConvIds((prev) => {
+      const updated = { ...prev };
+      delete updated[selectedAgent];
+      return updated;
+    });
     setMessages([]);
-    setConversationId(null);
     setError(null);
   }
 
@@ -273,7 +255,8 @@ export default function AIAssistant() {
     setLoading(true);
 
     try {
-      let data: { reply: string; conversation_id?: string; tool_calls_made?: number };
+      let data: { reply: string; conversation_id?: string; agent_name?: string; tool_calls_made?: number };
+      const currentConvId = convIds[selectedAgent];
 
       const headers = {
         'Content-Type': 'application/json',
@@ -284,35 +267,36 @@ export default function AIAssistant() {
         const res = await fetch(`${BASE}/api/v1/assistant/chat`, {
           method: 'POST',
           headers,
-          body: JSON.stringify({ message: text, conversation_id: conversationId }),
+          body: JSON.stringify({ message: text, conversation_id: currentConvId ?? null }),
         });
-        if (res.status === 401) {
-          clearToken();
-          setToken(null);
-          throw new Error('Session expired — please sign in again');
-        }
+        if (res.status === 401) { clearToken(); setToken(null); throw new Error('Session expired'); }
         if (!res.ok) {
           const e = await res.json().catch(() => ({}));
           throw new Error(e?.error?.message ?? e?.detail ?? `HTTP ${res.status}`);
         }
         data = await res.json();
-        if (data.conversation_id) setConversationId(data.conversation_id);
+        data.agent_name = 'General Assistant';
       } else {
         const res = await fetch(`${BASE}/api/v1/agents/run`, {
           method: 'POST',
           headers,
-          body: JSON.stringify({ agent: selectedAgent, message: text }),
+          body: JSON.stringify({
+            agent: selectedAgent,
+            message: text,
+            conversation_id: currentConvId ?? null,
+          }),
         });
-        if (res.status === 401) {
-          clearToken();
-          setToken(null);
-          throw new Error('Session expired — please sign in again');
-        }
+        if (res.status === 401) { clearToken(); setToken(null); throw new Error('Session expired'); }
         if (!res.ok) {
           const e = await res.json().catch(() => ({}));
           throw new Error(e?.error?.message ?? e?.detail ?? `HTTP ${res.status}`);
         }
         data = await res.json();
+      }
+
+      // Save the conversation ID for this agent
+      if (data.conversation_id) {
+        setConvIds((prev) => ({ ...prev, [selectedAgent]: data.conversation_id! }));
       }
 
       setMessages((prev) => [
@@ -321,6 +305,7 @@ export default function AIAssistant() {
           id: (Date.now() + 1).toString(),
           role: 'assistant',
           content: data.reply || '(no reply)',
+          agentName: data.agent_name,
           toolCallsMade: data.tool_calls_made,
         },
       ]);
@@ -337,6 +322,12 @@ export default function AIAssistant() {
       send();
     }
   }
+
+  // Get display name for the current agent
+  const currentAgentName =
+    selectedAgent === 'assistant'
+      ? 'General Assistant'
+      : agents.find((a) => a.id === selectedAgent)?.name ?? selectedAgent.replace(/_/g, ' ');
 
   return (
     <section
@@ -382,7 +373,7 @@ export default function AIAssistant() {
               <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
-                  onClick={() => { setSelectedAgent('assistant'); reset(); }}
+                  onClick={() => setSelectedAgent('assistant')}
                   className={`font-mono text-[10.5px] uppercase tracking-wider px-3.5 py-1.5 rounded-full border transition-all ${
                     selectedAgent === 'assistant'
                       ? 'border-cyan text-cyan bg-cyan/10 shadow-[0_0_12px_rgba(180,140,255,0.1)]'
@@ -395,7 +386,7 @@ export default function AIAssistant() {
                   <button
                     key={a.id}
                     type="button"
-                    onClick={() => { setSelectedAgent(a.id); reset(); }}
+                    onClick={() => setSelectedAgent(a.id)}
                     title={a.description}
                     className={`font-mono text-[10.5px] uppercase tracking-wider px-3.5 py-1.5 rounded-full border transition-all ${
                       selectedAgent === a.id
@@ -413,36 +404,35 @@ export default function AIAssistant() {
             <div className="flex items-center gap-2 border-b border-border bg-white/[0.015] px-5 py-2.5">
               <span className="w-dot w-dot-ok" />
               <span className="font-mono text-[10.5px] tracking-wider text-steel">
-                {selectedAgent === 'assistant'
-                  ? 'GENERAL ASSISTANT'
-                  : selectedAgent.toUpperCase().replace(/_/g, ' ')}
+                {currentAgentName.toUpperCase()}
               </span>
               <button
                 type="button"
-                onClick={reset}
+                onClick={newSession}
                 className="ml-auto font-mono text-[10px] text-steelDim hover:text-cyan transition-colors"
               >
                 NEW SESSION
               </button>
             </div>
 
-            {/* Message thread — fills available height */}
+            {/* Message thread */}
             <div className="flex-1 overflow-y-auto p-5 space-y-4" style={{ minHeight: 0 }}>
-              {messages.length === 0 && (
+              {historyLoading && (
+                <div className="flex items-center justify-center py-8">
+                  <span className="font-mono text-[11px] text-steelDim animate-pulse">Loading conversation history...</span>
+                </div>
+              )}
+              {!historyLoading && messages.length === 0 && (
                 <div className="flex h-full min-h-[200px] items-center justify-center">
                   <div className="text-center">
                     <div className="mb-4 text-[32px] opacity-20">◈</div>
                     <p className="font-mono text-[12px] text-steelDim leading-relaxed">
-                      Ask a security question — e.g.
-                      <br />
-                      <span className="text-steel">&ldquo;Score CVE-2021-44228 for an internet-facing server, criticality 9&rdquo;</span>
-                      <br />
-                      <span className="text-steel">&ldquo;Check my CERT-In compliance — logs retained 90 days, no NTP server&rdquo;</span>
+                      Start a new conversation with the <span className="text-steel">{currentAgentName}</span>
                     </p>
                   </div>
                 </div>
               )}
-              {messages.map((m) => (
+              {!historyLoading && messages.map((m) => (
                 <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                   <div
                     className={`max-w-[82%] rounded-2xl px-4 py-3 text-[13.5px] leading-relaxed ${
@@ -453,9 +443,13 @@ export default function AIAssistant() {
                   >
                     {m.role === 'assistant' && (
                       <div className="flex items-center gap-2 mb-2">
-                        <span className="font-mono text-[9px] uppercase tracking-widest text-cyan">ZeroDay AI</span>
+                        <span className="font-mono text-[9px] uppercase tracking-widest text-cyan">
+                          {m.agentName ?? currentAgentName}
+                        </span>
                         {m.toolCallsMade ? (
-                          <span className="font-mono text-[9px] text-green">{m.toolCallsMade} tool{m.toolCallsMade > 1 ? 's' : ''} used</span>
+                          <span className="font-mono text-[9px] text-green">
+                            {m.toolCallsMade} tool{m.toolCallsMade > 1 ? 's' : ''} used
+                          </span>
                         ) : null}
                       </div>
                     )}
@@ -469,25 +463,25 @@ export default function AIAssistant() {
                     <span className="w-dot w-dot-ok" style={{ animationDelay: '0s' }} />
                     <span className="w-dot w-dot-ok" style={{ animationDelay: '0.2s' }} />
                     <span className="w-dot w-dot-ok" style={{ animationDelay: '0.4s' }} />
-                    <span className="font-mono text-[11px] text-steel ml-1">Analyzing…</span>
+                    <span className="font-mono text-[11px] text-steel ml-1">Analyzing...</span>
                   </div>
                 </div>
               )}
               {error && (
                 <div className="rounded-xl border border-red/20 bg-red/5 px-4 py-3 font-mono text-[11.5px] text-red">
-                  ⚠ {error}
+                  {error}
                 </div>
               )}
               <div ref={bottomRef} />
             </div>
 
-            {/* Input bar — pinned to bottom */}
+            {/* Input bar */}
             <div className="border-t border-border p-4 flex gap-3 bg-[#070c18]">
               <textarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={handleKey}
-                placeholder="Ask ZeroDay AI… (Enter to send, Shift+Enter for new line)"
+                placeholder={`Message ${currentAgentName}... (Enter to send, Shift+Enter for new line)`}
                 rows={2}
                 className="flex-1 resize-none rounded-xl border border-border bg-[#04060c] px-4 py-3 font-mono text-[13px] text-text placeholder:text-steelDim focus:border-cyan/50 focus:outline-none focus:shadow-[0_0_0_3px_rgba(180,140,255,0.06)] transition-all"
               />

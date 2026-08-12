@@ -18,13 +18,17 @@ services:
       - key: ALLOWED_ORIGINS
         value: '["https://your-app.vercel.app","https://zerodaysecurity.ai"]'
       # ── Database ──────────────────────────────────────────────
-      # Render free postgres: add a PostgreSQL database in the Render dashboard
-      # then copy the Internal Database URL here
+      # IMPORTANT: Set DATABASE_URL manually in Render dashboard to your
+      # Postgres Internal Database URL. SQLite will be wiped on free-tier restarts.
       - key: DATABASE_URL
         sync: false   # set manually in Render dashboard — never commit
       # ── Auth ──────────────────────────────────────────────────
+      # IMPORTANT: Set JWT_SECRET_KEY manually in Render dashboard to a fixed
+      # 64-char hex secret (run: openssl rand -hex 32).
+      # DO NOT use generateValue — it rotates the secret on every deploy and
+      # invalidates all existing login sessions.
       - key: JWT_SECRET_KEY
-        generateValue: true   # Render auto-generates a secure random value
+        sync: false   # set manually in Render dashboard — use openssl rand -hex 32
       - key: ACCESS_TOKEN_EXPIRE_MINUTES
         value: "30"
       - key: REFRESH_TOKEN_EXPIRE_MINUTES
@@ -43,7 +47,7 @@ services:
       - key: GEMINI_API_KEY
         sync: false
       - key: GEMINI_MODEL
-        value: gemini-2.0-flash
+        value: gemini-1.5-flash-latest
       - key: ANTHROPIC_API_KEY
         sync: false
       - key: ANTHROPIC_MODEL

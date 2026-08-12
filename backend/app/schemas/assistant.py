@@ -19,6 +19,7 @@ class ChatResponse(BaseModel):
 class ConversationRead(BaseModel):
     id: str
     title: str
+    agent_id: str
     created_at: str
 
 
@@ -31,5 +32,7 @@ class MessageRead(BaseModel):
 class ConversationDetail(BaseModel):
     id: str
     title: str
+    agent_id: str
     created_at: str
     messages: List[MessageRead]
+

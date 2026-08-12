@@ -44,7 +44,9 @@ async def chat(
             raise NotFoundError("Conversation not found")
     else:
         conversation = Conversation(
-            user_id=user.id, title=request.message[:60] or "New conversation"
+            user_id=user.id,
+            agent_id="assistant",
+            title=request.message[:60] or "New conversation",
         )
         db.add(conversation)
         await db.flush()
@@ -125,14 +127,14 @@ async def chat(
 
 @router.get("/conversations", response_model=list[ConversationRead])
 async def list_conversations(
+    agent_id: str | None = None,
     user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ) -> list[Conversation]:
-    result = await db.execute(
-        select(Conversation)
-        .where(Conversation.user_id == user.id)
-        .order_by(Conversation.created_at.desc())
-    )
+    query = select(Conversation).where(Conversation.user_id == user.id)
+    if agent_id:
+        query = query.where(Conversation.agent_id == agent_id)
+    result = await db.execute(query.order_by(Conversation.created_at.desc()))
     return result.scalars().all()
 
 
@@ -161,6 +163,7 @@ async def get_conversation(
     return ConversationDetail(
         id=conversation.id,
         title=conversation.title,
+        agent_id=conversation.agent_id,
         created_at=conversation.created_at.isoformat(),
         messages=[
             MessageRead(

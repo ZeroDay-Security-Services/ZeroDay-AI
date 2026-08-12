@@ -124,12 +124,38 @@ def _gemini_response_to_anthropic(body: dict[str, Any]) -> dict[str, Any]:
 
 
 class GeminiClient(BaseLLMClient):
+    # Ordered list of models to try - first one that works wins
+    FALLBACK_MODELS = [
+        "gemini-1.5-flash-latest",
+        "gemini-1.5-flash",
+        "gemini-1.5-pro-latest",
+        "gemini-1.5-pro",
+        "gemini-pro",
+    ]
+
     def __init__(
-        self, api_key: str, model: str = "gemini-2.0-flash", timeout: float = 60.0
+        self, api_key: str, model: str = "gemini-1.5-flash-latest", timeout: float = 60.0
     ) -> None:
         self.api_key = api_key
         self.model = model
         self.timeout = timeout
+
+    async def _try_model(
+        self,
+        client: httpx.AsyncClient,
+        model: str,
+        payload: dict[str, Any],
+    ) -> dict[str, Any]:
+        url = f"{GEMINI_BASE}/{model}:generateContent?key={self.api_key}"
+        response = await client.post(
+            url,
+            json=payload,
+            headers={"Content-Type": "application/json"},
+        )
+        if response.status_code == 404:
+            raise httpx.HTTPStatusError("404", request=response.request, response=response)
+        response.raise_for_status()
+        return response.json()
 
     async def create_message(
         self,
@@ -139,8 +165,6 @@ class GeminiClient(BaseLLMClient):
         tools: list[dict[str, Any]] | None = None,
         max_tokens: int = 2048,
     ) -> dict[str, Any]:
-        url = f"{GEMINI_BASE}/{self.model}:generateContent?key={self.api_key}"
-
         payload: dict[str, Any] = {
             "system_instruction": {"parts": [{"text": system}]},
             "contents": _anthropic_messages_to_gemini(messages),
@@ -149,12 +173,22 @@ class GeminiClient(BaseLLMClient):
         if tools:
             payload["tools"] = _anthropic_tools_to_gemini(tools)
 
-        async with httpx.AsyncClient(timeout=self.timeout) as client:
-            response = await client.post(
-                url,
-                json=payload,
-                headers={"Content-Type": "application/json"},
-            )
-            response.raise_for_status()
+        # Build the ordered list: configured model first, then fallbacks
+        models_to_try = [self.model] + [m for m in self.FALLBACK_MODELS if m != self.model]
 
-        return _gemini_response_to_anthropic(response.json())
+        async with httpx.AsyncClient(timeout=self.timeout) as client:
+            last_error: Exception = RuntimeError("No models to try")
+            for model in models_to_try:
+                try:
+                    body = await self._try_model(client, model, payload)
+                    if model != self.model:
+                        logger.warning("Primary model %s failed; used %s instead", self.model, model)
+                    return _gemini_response_to_anthropic(body)
+                except httpx.HTTPStatusError as exc:
+                    if exc.response.status_code == 404:
+                        logger.warning("Gemini model %s not found (404), trying next fallback", model)
+                        last_error = exc
+                        continue
+                    raise
+            raise last_error
+

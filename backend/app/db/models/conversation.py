@@ -22,10 +22,13 @@ class Conversation(Base):
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True, default=_uuid)
     user_id: Mapped[str] = mapped_column(String(36), ForeignKey("users.id"), index=True)
+    # agent_id: "assistant" for General Assistant, agent name for specialist agents
+    agent_id: Mapped[str] = mapped_column(String(64), nullable=False, default="assistant", index=True)
     title: Mapped[str] = mapped_column(String(255), default="New conversation")
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=_utcnow
     )
+
 
 
 class Message(Base):

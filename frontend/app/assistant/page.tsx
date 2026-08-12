@@ -284,7 +284,7 @@ function MessageBubble({ msg, agentColor }: { msg: Message; agentColor: typeof A
         {!isUser && (
           <div className="flex items-center gap-2 px-1">
             <span className={`font-mono text-[9.5px] uppercase tracking-widest ${agentColor.text}`}>
-              ZeroDay AI
+              {msg.agentName ?? 'ZeroDay AI'}
             </span>
             {msg.toolCallsMade ? (
               <span className="font-mono text-[9px] text-green">
@@ -331,8 +331,10 @@ export default function AssistantPage() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
-  const [conversationId, setConversationId] = useState<string | null>(null);
+  // Per-agent conversation IDs: agentId -> conversationId
+  const [convIds, setConvIds] = useState<Record<string, string>>({});
   const [error, setError] = useState<string | null>(null);
+  const [historyLoading, setHistoryLoading] = useState(false);
 
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -358,13 +360,68 @@ export default function AssistantPage() {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  // ── Switch agent → clear conversation ────────────────────
+  // ── Load history for the selected agent ─────────────────
+  const loadAgentHistory = useCallback(async (agentId: string, tok: string) => {
+    setHistoryLoading(true);
+    setMessages([]);
+    setError(null);
+    try {
+      let listUrl: string;
+      let detailBase: string;
+      if (agentId === 'assistant') {
+        listUrl = `${BASE}/api/v1/assistant/conversations?agent_id=assistant`;
+        detailBase = `${BASE}/api/v1/assistant/conversations/`;
+      } else {
+        listUrl = `${BASE}/api/v1/agents/conversations?agent=${agentId}`;
+        detailBase = `${BASE}/api/v1/agents/conversations/`;
+      }
+      const listRes = await fetch(listUrl, { headers: { Authorization: `Bearer ${tok}` } });
+      if (!listRes.ok) return;
+      const convos = await listRes.json();
+      if (!convos || convos.length === 0) return;
+
+      const latestId = convos[0].id;
+      const detailRes = await fetch(`${detailBase}${latestId}`, {
+        headers: { Authorization: `Bearer ${tok}` },
+      });
+      if (!detailRes.ok) return;
+      const detail = await detailRes.json();
+
+      setConvIds((prev) => ({ ...prev, [agentId]: detail.id }));
+      const agName = agentId === 'assistant'
+        ? 'General Assistant'
+        : STATIC_AGENTS.find((a) => a.id === agentId)?.name ?? agentId;
+
+      setMessages(
+        detail.messages
+          .filter((m: any) => m.role === 'user' || m.role === 'assistant')
+          .map((m: any, i: number) => ({
+            id: `hist-${i}`,
+            role: m.role,
+            agentName: m.role === 'assistant' ? agName : undefined,
+            timestamp: new Date(m.created_at),
+            content: Array.isArray(m.content)
+              ? m.content.map((c: any) => c.text || '').join('')
+              : String(m.content),
+          }))
+      );
+    } catch (e) {
+      console.error('Failed to load history', e);
+    } finally {
+      setHistoryLoading(false);
+    }
+  }, []);
+
+  // Load history on auth or agent switch
+  useEffect(() => {
+    if (!token) return;
+    loadAgentHistory(selectedAgent, token);
+  }, [token, selectedAgent, loadAgentHistory]);
+
+  // ── Switch agent → load that agent's history ──────────────
   function selectAgent(id: string) {
     setSelectedAgent(id);
-    setMessages([]);
-    setConversationId(null);
     setError(null);
-    // Re-focus input after switching
     setTimeout(() => textareaRef.current?.focus(), 50);
   }
 
@@ -377,7 +434,7 @@ export default function AssistantPage() {
     clearToken();
     setToken(null);
     setMessages([]);
-    setConversationId(null);
+    setConvIds({});
     setError(null);
   }
 
@@ -404,14 +461,13 @@ export default function AssistantPage() {
         Authorization: `Bearer ${token}`,
       };
 
-      let data: { reply?: string; conversation_id?: string; tool_calls_made?: number };
+      let data: { reply?: string; conversation_id?: string; agent_name?: string; tool_calls_made?: number };
 
       if (selectedAgent === 'assistant') {
-        // Legacy general assistant route — maintains conversation history
         const res = await fetch(`${BASE}/api/v1/assistant/chat`, {
           method: 'POST',
           headers,
-          body: JSON.stringify({ message: text, conversation_id: conversationId }),
+          body: JSON.stringify({ message: text, conversation_id: convIds['assistant'] ?? null }),
         });
         if (res.status === 401) { clearToken(); setToken(null); throw new Error('Session expired — please sign in again'); }
         if (!res.ok) {
@@ -419,13 +475,17 @@ export default function AssistantPage() {
           throw new Error(e?.error?.message ?? e?.detail ?? `HTTP ${res.status}`);
         }
         data = await res.json();
-        if (data.conversation_id) setConversationId(data.conversation_id);
+        data.agent_name = 'General Assistant';
+        if (data.conversation_id) setConvIds((prev) => ({ ...prev, assistant: data.conversation_id! }));
       } else {
-        // All named agents (master + specialists) — single-turn via agents/run
         const res = await fetch(`${BASE}/api/v1/agents/run`, {
           method: 'POST',
           headers,
-          body: JSON.stringify({ agent: selectedAgent, message: text }),
+          body: JSON.stringify({
+            agent: selectedAgent,
+            message: text,
+            conversation_id: convIds[selectedAgent] ?? null,
+          }),
         });
         if (res.status === 401) { clearToken(); setToken(null); throw new Error('Session expired — please sign in again'); }
         if (!res.ok) {
@@ -433,6 +493,7 @@ export default function AssistantPage() {
           throw new Error(e?.error?.message ?? e?.detail ?? `HTTP ${res.status}`);
         }
         data = await res.json();
+        if (data.conversation_id) setConvIds((prev) => ({ ...prev, [selectedAgent]: data.conversation_id! }));
       }
 
       const assistantMsg: Message = {
@@ -440,7 +501,7 @@ export default function AssistantPage() {
         role: 'assistant',
         content: data.reply ?? '(no reply)',
         toolCallsMade: data.tool_calls_made,
-        agentName: selectedAgent,
+        agentName: data.agent_name ?? currentAgent?.name,
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, assistantMsg]);
@@ -450,7 +511,7 @@ export default function AssistantPage() {
       setLoading(false);
       setTimeout(() => textareaRef.current?.focus(), 50);
     }
-  }, [input, loading, token, selectedAgent, conversationId]);
+  }, [input, loading, token, selectedAgent, convIds]);
 
   function handleKey(e: React.KeyboardEvent<HTMLTextAreaElement>) {
     if (e.key === 'Enter' && !e.shiftKey) {
@@ -599,7 +660,11 @@ export default function AssistantPage() {
                 </div>
                 <button
                   type="button"
-                  onClick={() => { setMessages([]); setConversationId(null); setError(null); }}
+                  onClick={() => {
+                    setConvIds((prev) => { const u = { ...prev }; delete u[selectedAgent]; return u; });
+                    setMessages([]);
+                    setError(null);
+                  }}
                   className="ml-auto rounded-lg border border-border px-3 py-1 font-mono text-[9.5px] text-steelDim transition-all hover:border-cyan/40 hover:text-cyan"
                 >
                   NEW SESSION
@@ -608,8 +673,14 @@ export default function AssistantPage() {
 
               {/* ── Message thread ────────────────────────── */}
               <div className="flex-1 overflow-y-auto px-6 py-6 space-y-5" style={{ minHeight: 0 }}>
+                {/* History loading state */}
+                {historyLoading && (
+                  <div className="flex items-center justify-center py-8">
+                    <span className="font-mono text-[11px] text-steelDim animate-pulse">Loading conversation history...</span>
+                  </div>
+                )}
                 {/* Empty state */}
-                {messages.length === 0 && (
+                {!historyLoading && messages.length === 0 && (
                   <div className="flex h-full items-center justify-center">
                     <div className="max-w-[460px] text-center">
                       <div className={`mb-5 text-[40px] ${agentColor.text} opacity-30`}>

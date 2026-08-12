@@ -33,13 +33,16 @@ class BaseAgent:
             return all_tools
         return [t for t in all_tools if t["name"] in self.tool_names]
 
-    async def run(self, message: str, db: AsyncSession) -> AgentResult:
+    async def _run_loop(
+        self,
+        messages: list[dict[str, Any]],
+        db: AsyncSession,
+    ) -> tuple[list[dict[str, Any]], int]:
+        """Core agentic loop — shared by run() and run_with_history()."""
         from app.ai_core.tools import TOOL_DEFINITIONS
 
-        client = get_llm_client()  # raises LLMNotConfiguredError if unconfigured
-
+        client = get_llm_client()
         tools = self._filtered_tools(TOOL_DEFINITIONS)
-        messages: list[dict[str, Any]] = [{"role": "user", "content": message}]
         new_turns: list[dict[str, Any]] = []
         tool_calls_made = 0
 
@@ -78,6 +81,13 @@ class BaseAgent:
             messages.append(tool_turn)
             new_turns.append(tool_turn)
 
+        return new_turns, tool_calls_made
+
+    async def run(self, message: str, db: AsyncSession) -> AgentResult:
+        """Run agent with just a single user message (no prior history)."""
+        messages: list[dict[str, Any]] = [{"role": "user", "content": message}]
+        new_turns, tool_calls_made = await self._run_loop(messages, db)
+
         reply = ""
         for turn in reversed(new_turns):
             if turn["role"] == "assistant":
@@ -94,3 +104,34 @@ class BaseAgent:
             tool_calls_made=tool_calls_made,
             raw_turns=new_turns,
         )
+
+    async def run_with_history(
+        self,
+        message: str,
+        history: list[dict[str, Any]],
+        db: AsyncSession,
+    ) -> AgentResult:
+        """Run agent with full prior conversation history for context."""
+        # Build messages: history + new user message
+        messages: list[dict[str, Any]] = list(history) + [
+            {"role": "user", "content": message}
+        ]
+        new_turns, tool_calls_made = await self._run_loop(messages, db)
+
+        reply = ""
+        for turn in reversed(new_turns):
+            if turn["role"] == "assistant":
+                reply = "\n".join(
+                    b.get("text", "")
+                    for b in turn["content"]
+                    if isinstance(b, dict) and b.get("type") == "text"
+                )
+                break
+
+        return AgentResult(
+            agent=self.name,
+            reply=reply,
+            tool_calls_made=tool_calls_made,
+            raw_turns=new_turns,
+        )
+
