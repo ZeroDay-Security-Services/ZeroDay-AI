@@ -34,7 +34,7 @@ export default function HomePage() {
         <Nav />
 
         {/* ── HERO ─────────────────────────────────────── */}
-        <section id="home" className="scroll-mt-20">
+        <section id="home" className="scroll-mt-[72px]">
           <Hero />
         </section>
 

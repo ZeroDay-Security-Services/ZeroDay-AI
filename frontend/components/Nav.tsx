@@ -43,7 +43,7 @@ export default function Nav() {
   }, []);
 
   return (
-    <nav className="sticky top-0 z-50 flex items-center justify-between border-b border-border/70 bg-bg/75 px-6 py-4 backdrop-blur-xl sm:px-8">
+    <nav className="sticky top-0 z-50 flex h-[72px] items-center justify-between border-b border-border/70 bg-bg/75 px-6 backdrop-blur-xl sm:px-8">
       <a href="#home" className="flex items-center gap-3 no-underline">
         <Image
           src={logo}

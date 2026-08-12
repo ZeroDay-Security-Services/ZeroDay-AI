@@ -53,7 +53,7 @@ const agents = [
 
 export default function Agents() {
   return (
-    <section id="agents" className="scroll-mt-20 px-8 py-20">
+    <section id="agents" className="scroll-mt-[72px] px-8 pt-10 pb-20">
       <div className="mx-auto mb-12 max-w-[640px] text-center">
         <span className="mb-3.5 block font-mono text-[11px] uppercase tracking-widest text-cyan">
           Automation

@@ -25,7 +25,7 @@
 
 html {
   scroll-behavior: smooth;
-  scroll-padding-top: 76px;
+  scroll-padding-top: 72px;
 }
 
 body {
@@ -187,13 +187,7 @@ body {
   animation-delay: 0.4s;
 }
 
-/* Slight alternating tilt for the floating feature-pill row (Hero) */
-.tilt-pill:nth-child(odd) {
-  transform: rotate(-2.2deg) translateY(2px);
-}
-.tilt-pill:nth-child(even) {
-  transform: rotate(2.2deg) translateY(-2px);
-}
+/* Floating feature-pill row (Hero) — flat, no rotation */
 .tilt-pill:hover {
-  transform: rotate(0deg) translateY(-3px);
+  transform: translateY(-3px);
 }

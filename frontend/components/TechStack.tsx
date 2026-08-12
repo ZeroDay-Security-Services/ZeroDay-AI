@@ -47,11 +47,8 @@ const columns = [
 
 export default function TechStack() {
   return (
-    <section id="stack" className="scroll-mt-20 px-8 py-20">
+    <section id="stack" className="scroll-mt-[72px] px-8 pt-10 pb-20">
       <div className="mx-auto mb-12 max-w-[640px] text-center">
-        <span className="mb-3.5 block font-mono text-[11px] uppercase tracking-widest text-cyan">
-          Documentation
-        </span>
         <h2 className="mb-4 font-display text-[28px] font-bold tracking-tight text-text sm:text-[38px]">
           Built on a modular, swappable core
         </h2>

@@ -62,7 +62,7 @@ export default function LiveDashboard() {
   }, []);
 
   return (
-    <section id="dashboard" className="scroll-mt-20 px-8 py-20">
+    <section id="dashboard" className="scroll-mt-[72px] px-8 pt-10 pb-20">
       <div className="mx-auto max-w-[1200px]">
         <div className="mb-12 text-center">
           <span className="mb-3.5 block font-mono text-[11px] uppercase tracking-widest text-cyan">
