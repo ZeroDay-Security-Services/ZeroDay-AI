@@ -16,7 +16,7 @@ services:
       - key: LOG_LEVEL
         value: INFO
       - key: ALLOWED_ORIGINS
-        value: '["https://your-app.vercel.app","https://zerodaysecurity.ai"]'
+        sync: false
       # ── Database ──────────────────────────────────────────────
       # IMPORTANT: Set DATABASE_URL manually in Render dashboard to your
       # Postgres Internal Database URL. SQLite will be wiped on free-tier restarts.
