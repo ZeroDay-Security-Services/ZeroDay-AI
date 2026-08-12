@@ -639,7 +639,7 @@ export default function AssistantPage() {
               </div>
               <div className="flex items-center gap-2">
                 <span className="w-dot w-dot-info" style={{ width: 5, height: 5 }} />
-                Groq LLM active
+                AI Engine active
               </div>
             </div>
           </div>
