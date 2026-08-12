@@ -45,6 +45,7 @@ class AssistantService:
                 system=SYSTEM_PROMPT,
                 messages=working_messages,
                 tools=TOOL_DEFINITIONS,
+                max_tokens=1024,
             )
             assistant_content = response.get("content", [])
             assistant_turn = {"role": "assistant", "content": assistant_content}

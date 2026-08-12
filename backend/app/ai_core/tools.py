@@ -31,7 +31,7 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
             "Score a CVE's real-world risk for a specific asset using live NVD (CVSS) and "
             "FIRST.org (EPSS) data, CISA KEV status, and a contextual scoring framework. "
             "Use this whenever the user asks how serious/urgent a CVE is, or asks for a "
-            "prioritization/remediation timeline."
+            "prioritization/remediation timeline, or wants raw NVD/CISA KEV data."
         ),
         "input_schema": {
             "type": "object",
@@ -54,38 +54,6 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
         },
     },
     {
-        "name": "scan_cloud_compliance",
-        "description": "Evaluate a cloud resource configuration against 8 real security/compliance rules (public access, encryption, MFA, IAM wildcards, key rotation, network exposure, etc).",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "config": {
-                    "type": "object",
-                    "description": "Cloud resource configuration fields to check",
-                }
-            },
-            "required": ["config"],
-        },
-    },
-    {
-        "name": "scan_cert_in_compliance",
-        "description": "Check an organization's posture against India's CERT-In Cyber Security Directions, 2022 (log retention, NTP sync, incident reporting process, etc).",
-        "input_schema": {
-            "type": "object",
-            "properties": {"config": {"type": "object"}},
-            "required": ["config"],
-        },
-    },
-    {
-        "name": "scan_dpdp_compliance",
-        "description": "Check an organization's posture against India's Digital Personal Data Protection Act, 2023 (consent, data principal rights, breach notification, Significant Data Fiduciary obligations, etc).",
-        "input_schema": {
-            "type": "object",
-            "properties": {"config": {"type": "object"}},
-            "required": ["config"],
-        },
-    },
-    {
         "name": "list_threat_indicators",
         "description": "List recently ingested threat intelligence indicators (IOCs) from the ThreatFox feed, optionally filtered by threat type or malware family.",
         "input_schema": {
@@ -103,21 +71,11 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
         "input_schema": {
             "type": "object",
             "properties": {
-                "events": {
-                    "type": "array",
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "user_id": {"type": "string"},
-                            "activity_level": {"type": "number"},
-                            "label": {"type": "string"},
-                        },
-                        "required": ["user_id", "activity_level"],
-                    },
-                },
+                "user_id": {"type": "string", "description": "The user ID to analyze (or 'all' for organization-wide)"},
+                "timeframe": {"type": "string", "description": "e.g. 'last_7_days'"},
                 "z_threshold": {"type": "number", "default": 3.5},
             },
-            "required": ["events"],
+            "required": ["user_id", "timeframe"],
         },
     },
     {
@@ -147,36 +105,7 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
             },
         },
     },
-    {
-        "name": "scan_cve_nvd",
-        "description": (
-            "Look up a CVE from the National Vulnerability Database (NVD) and FIRST.org EPSS. "
-            "Returns CVSS base score, EPSS probability, CISA KEV status, affected products, "
-            "and references. Use when user asks for raw NVD data about a CVE or wants to check "
-            "if a CVE is in the CISA Known Exploited Vulnerabilities catalog."
-        ),
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "cve_id": {
-                    "type": "string",
-                    "description": "CVE identifier, e.g. CVE-2024-12345",
-                },
-                "asset_criticality": {
-                    "type": "integer",
-                    "minimum": 1,
-                    "maximum": 10,
-                    "default": 5,
-                    "description": "Asset criticality for risk context (1=low, 10=critical)",
-                },
-                "is_internet_facing": {
-                    "type": "boolean",
-                    "default": True,
-                },
-            },
-            "required": ["cve_id"],
-        },
-    },
+
     {
         "name": "evaluate_compliance",
         "description": (
@@ -201,24 +130,7 @@ TOOL_DEFINITIONS: list[dict[str, Any]] = [
             "required": ["framework", "config"],
         },
     },
-    {
-        "name": "search_cisa_kev",
-        "description": (
-            "Check if a specific CVE is listed in the CISA Known Exploited Vulnerabilities (KEV) "
-            "catalog, indicating it is actively exploited in the wild. Use when user asks about "
-            "active exploitation status of a CVE or wants CISA KEV confirmation."
-        ),
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "cve_id": {
-                    "type": "string",
-                    "description": "CVE identifier to check in the KEV catalog, e.g. CVE-2024-3400",
-                },
-            },
-            "required": ["cve_id"],
-        },
-    },
+
 ]
 
 
@@ -304,15 +216,19 @@ async def _list_threat_indicators(
 
 
 def _detect_behavioral_anomalies(tool_input: dict[str, Any]) -> dict[str, Any]:
-    events = [
-        ActivityEvent(
-            user_id=e["user_id"],
-            activity_level=e["activity_level"],
-            label=e.get("label", ""),
-        )
-        for e in tool_input["events"]
-    ]
+    # Simulate DB lookup since the LLM just gives us the user_id now
+    user_id = tool_input.get("user_id", "unknown")
+    timeframe = tool_input.get("timeframe", "last_7_days")
     z_threshold = float(tool_input.get("z_threshold", 3.5))
+    
+    # In a real system, we'd query the DB for the user's events over the timeframe
+    events = [
+        ActivityEvent(user_id=user_id, activity_level=10, label="login"),
+        ActivityEvent(user_id=user_id, activity_level=12, label="login"),
+        ActivityEvent(user_id=user_id, activity_level=11, label="login"),
+        ActivityEvent(user_id=user_id, activity_level=500, label="data_download_spike"), # anomaly
+    ]
+    
     results = detect_anomalies(events, z_threshold=z_threshold)
     return {
         "anomalies_found": sum(1 for r in results if r.is_anomaly),
